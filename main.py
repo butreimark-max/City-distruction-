@@ -114,34 +114,61 @@ class MyGame(arcade.Window):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         ]
 
-        # for way in range(self.amount_4way):
-        #     self.map[random.randint(0,ROW-1)][random.randint(0,COLUMN-1)]=5
-        column_spawn = 0
-        filled_rows = [(0, 1), (4, 1),]#  что бы не попадались на одинаковом row
+        all_points = [(2, 3), (4, 5), (7, 6), (4, 2)]
+
+        point_y = random.randint(0, ROW - 1)
+        point_x = random.randint(0, COLUMN - 1)
+        all_points.append((point_y, point_x))
+        print(all_points)
+        self.map[point_y][point_x] = 5
+
+        point_y = random.randint(0, ROW - 1)  # 0
+        point_x = random.randint(0, COLUMN - 1)  # 1
 
 
-        for x in range(0,COLUMN+1,4):   # срезаем по 4
-            if column_spawn ==3:
-                column_spawn=random.randint(1,3)
-            else:
-                column_spawn=random.randint(0,3) # сколько блоков внутри после...
-            if x + column_spawn>=COLUMN:    # не выходил за пределы окна
-                column_spawn=random.randint(1,COLUMN-1-x)
+        if self.map[point_x][point_y] == 0 and self.map[point_x + 1][point_y] == 0 and self.map[point_x - 1][point_y] == 0 and self.map[point_x][point_y + 1] == 0 and self.map[point_x][point_y - 1]:
+            all_points.append((point_y, point_x))
+            self.map[point_y][point_x] = 5
 
-            row_spawn=random.randint(1,3)   # либо внизу, либо вверху, либо в двух местах
 
-            if row_spawn==1:    # заспавнить только вверху
-                self.map[random.randint(0,ROW//2-1)][x+column_spawn] = 5
-                print(x)
-            if row_spawn == 2: # заспавнить только внизу
-                self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
-            if row_spawn == 3: # заспавнить только в двух местах
-                spawn_rule_up=random.randint(0,ROW//2-1 )
-                self.map[spawn_rule_up][x+column_spawn] = 5
-                if ROW-1//2==spawn_rule_up: # чтобы не заходил за карту
-                    self.map[random.randint( ROW // 2 +1,ROW-1)][x+column_spawn] = 5
-                else:
-                    self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
+
+
+
+
+
+
+
+
+
+
+        # points=random.randint(5,5)
+        # for y in range(ROW):
+        #     for x in range(COLUMN):
+        #         self.map[x][y] =
+
+        # column_spawn = 0
+        # for x in range(0,COLUMN+1,4):   # срезаем по 4
+        #     if column_spawn ==3:
+        #         column_spawn=random.randint(1,3)
+        #     else:
+        #         column_spawn=random.randint(0,3) # сколько блоков внутри после...
+        #     if x + column_spawn>=COLUMN:    # не выходил за пределы окна
+        #         column_spawn=random.randint(1,COLUMN-1-x)
+
+        # row_spawn=random.randint(1,3)   # либо внизу, либо вверху, либо в двух местах
+
+        # if row_spawn==1:    # заспавнить только вверху
+        #     self.map[random.randint(0,ROW//2-1)][x+column_spawn] = 5
+        #     print(x)
+        # if row_spawn == 2: # заспавнить только внизу
+        #     self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
+        # if row_spawn == 3: # заспавнить только в двух местах
+        #     spawn_rule_up=random.randint(0,ROW//2-1 )
+        #     self.map[spawn_rule_up][x+column_spawn] = 5
+        #     if ROW-1//2==spawn_rule_up: # чтобы не заходил за карту
+        #         self.map[random.randint( ROW // 2 +1,ROW-1)][x+column_spawn] = 5
+        #     else:
+        #         self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
 
         self.spawn_road()
 
