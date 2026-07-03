@@ -298,6 +298,8 @@ class MyGame(arcade.Window):
         #   for x in range(COLUMN):
         #        self.map[x][y] =
 
+        four_way_row_cordinate=random.randint(0,1)
+
         column_spawn = 0
         for x in range(0,COLUMN+1,4):   # срезаем по 4
             if column_spawn ==3:
@@ -310,11 +312,17 @@ class MyGame(arcade.Window):
             row_spawn=random.randint(1,3)   # либо внизу, либо вверху, либо в двух местах
 
             if row_spawn==1:    # заспавнить только вверху
-                self.map[random.randint(0,ROW//2-1)][x+column_spawn] = 5
+                while True:
+                    choose_y=random.randint(0,ROW//2-1)
+
+                    if choose_y%2==four_way_row_cordinate:
+                        self.map[choose_y][x+column_spawn] = 5
+                        break
                 print(x)
             if row_spawn == 2: # заспавнить только внизу
+
                 self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
-            if row_spawn == 3: # заспавнить только в двух местах
+            if row_spawn == 3: # заспавнить только в двух местахa
                 spawn_rule_up=random.randint(0,ROW//2-1 )
                 self.map[spawn_rule_up][x+column_spawn] = 5
                 if ROW-1//2==spawn_rule_up: # чтобы не заходил за карту
@@ -450,21 +458,26 @@ class MyGame(arcade.Window):
         self.boost_speed.update()
         self.player1_and_player2_collision_boost()
 
-        # if time.time() - self.time >= 2:
-        #     x_random = random.randint(0,COLUMN-1)
-        #     y_random  = random.randint(0,ROW-1)
-        #     type_random =random.randint(1,2)
-        #
-        #
-        #     if type_random == 1:
-        #         boost = Boost(center_x=x_random * CUBE_WIDTH + CUBE_HEIGHT / 2,
-        #                       center_y=y_random * CUBE_HEIGHT + CUBE_HEIGHT / 2, type=1,
-        #                       texture="Pictures/Speed_potion.png")
-        #
-        #
-        #     if type_random == 2:
-        #         boost = Boost(center_x=x_random * CUBE_WIDTH + CUBE_HEIGHT / 2,
-        #                       center_y=y_random * CUBE_HEIGHT + CUBE_HEIGHT / 2, type=2,
-        #                       texture="Pictures/lengght potion.png")
-        #     self.boost_speed.append(boost)
-        #     self.time = time.time()
+        if time.time() - self.time >= 2:
+            x_random = random.randint(0,COLUMN-1)
+            y_random  = random.randint(0,ROW-1)
+            type_random =random.randint(1,2)
+
+
+            if type_random == 1:
+                boost = Boost(center_x=x_random * CUBE_WIDTH + CUBE_HEIGHT / 2,
+                              center_y=y_random * CUBE_HEIGHT + CUBE_HEIGHT / 2, type=1,
+                              texture="Pictures/Speed_potion.png")
+
+
+            if type_random == 2:
+                boost = Boost(center_x=x_random * CUBE_WIDTH + CUBE_HEIGHT / 2,
+                              center_y=y_random * CUBE_HEIGHT + CUBE_HEIGHT / 2, type=2,
+                              texture="Pictures/lengght potion.png")
+            self.boost_speed.append(boost)
+            self.time = time.time()
+
+
+
+window = MyGame(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+arcade.run()
