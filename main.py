@@ -201,6 +201,7 @@ class MyGame(arcade.Window):
         for row in range(ROW):
             for column in range(COLUMN):
                 if self.map[row][column] == 5:
+
                     # ---------- right ---------- #
                     amount_of_road_right = random.randint(1, 3)
                     for numr in range(1, amount_of_road_right + 1):
@@ -227,37 +228,36 @@ class MyGame(arcade.Window):
                         if row + numd < len(self.map):
                             self.map[row + numd][column] = 1
 
-        for row in range(ROW):
-            for column in range(COLUMN):
-                try:
+        for row in range(1,ROW-1):
+            for column in range(1,COLUMN-1):
+
                     # ставим перекрёсток
                     if self.map[row][column] in [1, 2] and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row + -1][column] == 1:
                         self.map[row][column] = 5
 
-                    # в нижнюю сторону
+                    # t нижнюю сторону
                     elif self.map[row - 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2:
                         self.map[row][column] = 9
 
-                    # в правую сторону
+                    # t правую сторону
                     elif self.map[row][column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row - 1][
                         column] == 1:
                         self.map[row][column] = 8
 
 
-                    # в верхнюю сторону
+                    # t верхнюю сторону
                     elif self.map[row + 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2:
                         self.map[row][column] = 7
 
-                    # в левую сторону
+                    # t левую сторону
                     elif self.map[row][column - 1] == 1 and self.map[row - 1][column] == 2 and self.map[row + 1][
                         column] == 2:
                         self.map[row][column] = 6
 
-                except IndexError:
-                    continue
+
 
         self.map.reverse()
         for cell in self.map:
