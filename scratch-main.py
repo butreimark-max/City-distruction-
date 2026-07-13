@@ -1,6 +1,9 @@
 import random
 import time
+from fileinput import filename
+
 import arcade
+from arcade.sprite_list import sprite_list
 
 SCREEN_TITLE = ""
 CUBE_HEIGHT = 100
@@ -12,9 +15,39 @@ SPEED_PLAYER_1 = 10
 SPEED_PLAYER_2 = 10
 SPEED_LASER_1 = 2
 SPEED_LASER_2 = 5
+DURABILITY=5
 
 SCREEN_WIDTH = COLUMN * CUBE_WIDTH
 SCREEN_HEIGHT = ROW * CUBE_HEIGHT
+
+class Building(arcade.Sprite):
+    def __init__(self, center_x, center_y,type_building):
+        super().__init__(filename=("Pictures/pixilart-drawing (8).png" if type_building else "Pictures/pixilart-drawing (6).png"))
+        if type_building:
+            self.durability=DURABILITY
+
+        else:
+            self.durability=DURABILITY+10
+
+        self.center_x=center_x
+        self.center_y=center_y
+    def update(self):
+        if self.durability<0:
+            self.kill()
+    """робота  колизии """
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class FirstGodzilla (arcade.Sprite):
@@ -32,6 +65,16 @@ class FirstGodzilla (arcade.Sprite):
         self.lenght_cd=time.time()
 
     def update(self):
+        buildig_hit=arcade.check_for_collision_with_list(self, window.buildings)
+        for building in buildig_hit:
+            if self.left <building.right and  self.angle==-90:
+                self.left=building.right
+            if self.right > building.left and self.angle==90:
+                self.right=building.left
+            if self.top> building.bottom and self.angle==0:
+                self.top=building.bottom
+            if self.bottom < building.top and self.angle==180:
+                self.bottom=building.top
 
         self.center_x += self.change_x
         self.center_y += self.change_y
@@ -132,10 +175,11 @@ class MyGame(arcade.Window):
 
         self.hand = None
 
+        self.buildings= arcade.SpriteList()
         self.background_4way = arcade.load_texture("Pictures/pixilart-drawing (11).png")
         """all generations """
 
-        self.amount_4way = random.randint(4, 7)
+        self.amount_4way = random.randint(6, 8)
         # 0 - background (default)
         # 1 -road vertical
         # 2 -road horizontal
@@ -203,26 +247,26 @@ class MyGame(arcade.Window):
                 if self.map[row][column] == 5:
 
                     # ---------- right ---------- #
-                    amount_of_road_right = random.randint(1, 3)
+                    amount_of_road_right = random.randint(2, 5)
                     for numr in range(1, amount_of_road_right + 1):
                         if column + numr < len(self.map[row]):
                             self.map[row][column + numr] = 2
 
                     # ---------- left ---------- #
-                    amount_of_road_left = random.randint(1, 3)
+                    amount_of_road_left = random.randint(2, 5)
                     for numl in range(1, amount_of_road_left + 1):
 
                         if column - numl >= 0:
                             self.map[row][column - numl] = 2
 
                         # ---------- up ---------- #
-                    amount_of_road_up = random.randint(1, 3)
+                    amount_of_road_up = random.randint(2, 5)
                     for numu in range(1, amount_of_road_up + 1):
                         if row - numu >= 0:
                             self.map[row - numu][column] = 1
 
                         # ---------- down  ---------- #
-                    amount_of_road_down = random.randint(1, 3)
+                    amount_of_road_down = random.randint(2, 5)
                     for numd in range(1, amount_of_road_down + 1):
 
                         if row + numd < len(self.map):
@@ -238,23 +282,24 @@ class MyGame(arcade.Window):
 
                     # t нижнюю сторону
                     elif self.map[row - 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
-                        column + 1] == 2:
+                        column + 1] == 2  and not  self.map[row+1][column] == 1:
                         self.map[row][column] = 9
 
                     # t правую сторону
                     elif self.map[row][column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row - 1][
-                        column] == 1:
+                        column] == 1 and not self.map[row][column-1] == 2:
                         self.map[row][column] = 8
 
 
                     # t верхнюю сторону
                     elif self.map[row + 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
-                        column + 1] == 2:
+                        column + 1] == 2 and not  self.map[row-1][column] == 1:
+
                         self.map[row][column] = 7
 
                     # t левую сторону
-                    elif self.map[row][column - 1] == 1 and self.map[row - 1][column] == 2 and self.map[row + 1][
-                        column] == 2:
+                    elif self.map[row][column - 1] == 2 and self.map[row - 1][column] == 1 and self.map[row + 1][
+                        column] == 1   and not self.map[row][column+1] == 2:
                         self.map[row][column] = 6
 
 
@@ -262,8 +307,8 @@ class MyGame(arcade.Window):
         self.map.reverse()
         for cell in self.map:
             print(cell)
-
-    def spawn_4way(self):
+        self.spawn_buildings()
+    def spawn_4way(self, spawn_rule_up=None):
         self.map = [
 
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -320,15 +365,26 @@ class MyGame(arcade.Window):
                         break
                 print(x)
             if row_spawn == 2: # заспавнить только внизу
+                while True:
+                    choose_y=random.randint( ROW // 2 ,ROW-1)
 
-                self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
+                    if choose_y%2==four_way_row_cordinate:
+                        self.map[choose_y][x+column_spawn] = 5
+                        break
+
             if row_spawn == 3: # заспавнить только в двух местахa
-                spawn_rule_up=random.randint(0,ROW//2-1 )
+                
+                while True:
+                    choose_y = random.randint(0,ROW//2-1 )
+
+                    if choose_y % 2 == four_way_row_cordinate:
+                        spawn_rule_up = choose_y
+                        self.map[spawn_rule_up][x + column_spawn] = 5
+                        break
+                
+                
                 self.map[spawn_rule_up][x+column_spawn] = 5
-                if ROW-1//2==spawn_rule_up: # чтобы не заходил за карту
-                    self.map[random.randint( ROW // 2 +1,ROW-1)][x+column_spawn] = 5
-                else:
-                    self.map[random.randint( ROW // 2 ,ROW-1)][x+column_spawn] = 5
+
 
         self.spawn_road()
 
@@ -404,14 +460,25 @@ class MyGame(arcade.Window):
             self.player2.change_y = 0
         if symbol == arcade.key.RIGHT:
             self.player2.change_x = 0
-
-    def on_draw(self):
+    def spawn_buildings(self):
         self.clear((255, 255, 255))
         for y in range(ROW):
             for x in range(COLUMN):
                 if self.map[y][x] == 0:
-                    arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT-(y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
-                                                  CUBE_WIDTH, CUBE_HEIGHT, self.background_picture, )
+
+                    new_building = Building(center_x=x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                            center_y=y * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                            type_building=random.randint(0, 1))
+                    self.buildings.append(new_building)
+
+    def on_draw(self):
+        self.clear((255, 255, 255))
+        self.buildings.draw()
+        for y in range(ROW):
+            for x in range(COLUMN):
+                if self.map[y][x] == 0:
+                  print(0)
+
                 elif self.map[y][x] == 1:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,  SCREEN_HEIGHT-(y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                                   CUBE_WIDTH, CUBE_HEIGHT,
@@ -443,11 +510,13 @@ class MyGame(arcade.Window):
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT- (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                                   CUBE_WIDTH, CUBE_HEIGHT, self.background_t_turn_down, angle=90)
 
+
         self.player1.draw()
         self.player2.draw()
         self.lasers.draw()
         self.boost_range_laser.draw()
         self.boost_speed.draw()
+
 
     def on_update(self, delta_time):
 
@@ -457,6 +526,7 @@ class MyGame(arcade.Window):
         self.boost_range_laser.update()
         self.boost_speed.update()
         self.player1_and_player2_collision_boost()
+        self.buildings.update()
 
         if time.time() - self.time >= 2:
             x_random = random.randint(0,COLUMN-1)
