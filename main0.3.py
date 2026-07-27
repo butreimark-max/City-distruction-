@@ -1,12 +1,12 @@
 import random
 import time
 
-import sys
+
 
 import arcade
 
-print('Python %s on %s' % (sys.version, sys.platform))
-sys.path.extend(['C:\\Users\\polis\\PycharmProjects\\City-distruction-'])
+
+
 
 SCREEN_TITLE = ""
 CUBE_HEIGHT = 100
@@ -22,6 +22,15 @@ DURABILITY=5
 
 SCREEN_WIDTH = COLUMN * CUBE_WIDTH
 SCREEN_HEIGHT = ROW * CUBE_HEIGHT
+class Road(arcade.Sprite):
+    def __init__(self, center_x, center_y,angle,texture):
+        super().__init__()
+        self.center_x = center_x
+        self.center_y = center_y
+        self.angle=angle
+        self.texture=texture
+        # self.background_road_vertical[random.randint(0, 0)], )
+
 
 class Building(arcade.Sprite):
     def __init__(self, center_x, center_y,type_building):
@@ -180,6 +189,7 @@ class MyGame(arcade.Window):
         self.hand = None
 
         self.buildings= arcade.SpriteList()
+        self.roads= arcade.SpriteList()
         self.background_4way = arcade.load_texture("Pictures/pixilart-drawing (11).png")
         """all generations """
 
@@ -275,71 +285,75 @@ class MyGame(arcade.Window):
 
                         if row + numd < len(self.map):
                             self.map[row + numd][column] = 1
+        self.create_roads()
+
 
         for row in range(1,ROW-1):
             for column in range(1,COLUMN-1):
 
                     # ставим перекрёсток
-                    if self.map[row][column] in [1, 2] and self.map[row][column - 1] == 2 and self.map[row][
+                    if self.map[row][column] in [1, 2] and self.map[row][column] in [1, 2] and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row + -1][column] == 1:
                         self.map[row][column] = 5
 
                     # t нижнюю сторону
-                    elif self.map[row - 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
+                    elif self.map[row][column] in [1, 2] and self.map[row - 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2  and not  self.map[row+1][column] == 1:
                         self.map[row][column] = 9
 
                     # t правую сторону
-                    elif self.map[row][column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row - 1][
+                    elif self.map[row][column] in [1, 2] and  self.map[row][column + 1] == 2 and self.map[row + 1][column] == 1 and self.map[row - 1][
                         column] == 1 and not self.map[row][column-1] == 2:
                         self.map[row][column] = 8
 
 
                     # t верхнюю сторону
-                    elif self.map[row + 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
+                    elif  self.map[row][column] in [1, 2] and self.map[row + 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
                         column + 1] == 2 and not  self.map[row-1][column] == 1:
 
                         self.map[row][column] = 7
 
                     # t левую сторону
-                    elif (self.map[row][column - 1] == 2 and
+                    elif (self.map[row][column] in [1, 2] and
+                          self.map[row][column - 1] == 2 and
                           self.map[row - 1][column] == 1 and
                           self.map[row + 1][
                         column] == 1   and not
                           self.map[row][column+1] == 2):
                         self.map[row][column] = 6
                     # Поворот вверх + влево
-                    elif (
-                            self.map[row - 1][column] == 1 and
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row + 1][column] == 1 and
                             self.map[row][column - 1] == 2 and
-                            self.map[row + 1][column] != 1 and
+                            self.map[row - 1][column] != 1 and
                             self.map[row][column + 1] != 2
                     ):
                         self.map[row][column] = 10
 
                     # Поворот вверх + вправо
-                    elif (
-                            self.map[row - 1][column] == 1 and
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row +1][column] == 1 and
                             self.map[row][column + 1] == 2 and
-                            self.map[row + 1][column] != 1 and
+                            self.map[row - 1][column] != 1 and
                             self.map[row][column - 1] != 2
+
                     ):
                         self.map[row][column] = 11
 
                     # Поворот вниз + вправо
-                    elif (
-                            self.map[row + 1][column] == 1 and
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row - 1][column] == 1 and
                             self.map[row][column + 1] == 2 and
-                            self.map[row - 1][column] != 1 and
+                            self.map[row +1][column] != 1 and
                             self.map[row][column - 1] != 2
                     ):
                         self.map[row][column] = 12
 
                     # Поворот вниз + влево
-                    elif (
-                            self.map[row + 1][column] == 1 and
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row - 1][column] == 1 and
                             self.map[row][column - 1] == 2 and
-                            self.map[row - 1][column] != 1 and
+                            self.map[row + 1][column] != 1 and
                             self.map[row][column + 1] != 2
                     ):
                         self.map[row][column] = 13
@@ -503,7 +517,8 @@ class MyGame(arcade.Window):
         if symbol == arcade.key.RIGHT:
             self.player2.change_x = 0
     def spawn_buildings(self):
-        self.clear((255, 255, 255))
+        self.buildings.clear()
+
         for y in range(ROW):
             for x in range(COLUMN):
                 if self.map[y][x] == 0:
@@ -512,14 +527,87 @@ class MyGame(arcade.Window):
                                             center_y=y * CUBE_WIDTH + CUBE_WIDTH / 2,
                                             type_building=random.randint(0, 1))
                     self.buildings.append(new_building)
+    def create_roads(self):
+        self.roads.clear()
+        for y in range(ROW):
+            for x in range(COLUMN):
+                if self.map[y][x] == 0:
+                    continue
 
+                elif self.map[y][x] == 1:
+                        new_road=Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,  SCREEN_HEIGHT-(y  * CUBE_HEIGHT + CUBE_HEIGHT / 2),angle=0, texture=
+                                                  self.background_road_vertical[random.randint(0, 0)] )
+                        self.roads.append(new_road)
+                elif self.map[y][x] == 2:
+                    new_road=Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,  SCREEN_HEIGHT-(y * CUBE_HEIGHT + CUBE_HEIGHT / 2),angle=90,texture=
+
+                                                  self.background_road_horizontal[random.randint(0, 0)])
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 3:
+                    continue
+                elif self.map[y][x] == 4:
+                   continue
+                elif self.map[y][x] == 5:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=0, texture=self.background_4way)
+
+
+                    self.roads.append(new_road)
+
+                elif self.map[y][x] == 6:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=0, texture=self.background_t_turn_left)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 7:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=270,
+                                    texture=self.background_t_turn_up)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 8:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=180,
+                                    texture=self.background_t_turn_right)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 9:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=90,
+                                    texture=self.background_t_turn_down)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 10:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=0,
+                                    texture=self.background_turn)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 11:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=270,
+                                    texture=self.background_turn)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 12:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=180,
+                                    texture=self.background_turn)
+
+                    self.roads.append(new_road)
+                elif self.map[y][x] == 13:
+                    new_road = Road(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2), angle=270,
+                                    texture=self.background_turn)
+
+                    self.roads.append(new_road)
     def on_draw(self):
         self.clear((255, 255, 255))
         self.buildings.draw()
         for y in range(ROW):
             for x in range(COLUMN):
                 if self.map[y][x] == 0:
-                  print(0)
+                    continue
 
                 elif self.map[y][x] == 1:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,  SCREEN_HEIGHT-(y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
@@ -556,19 +644,20 @@ class MyGame(arcade.Window):
                                                   CUBE_WIDTH, CUBE_HEIGHT, self.background_turn, angle=0)
                 elif self.map[y][x] == 11:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT- (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
-                                                  CUBE_WIDTH, CUBE_HEIGHT, self.background_turn, angle=90)
+                                                  CUBE_WIDTH, CUBE_HEIGHT, self.background_turn, angle=270)
                 elif self.map[y][x] == 12:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT- (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                                   CUBE_WIDTH, CUBE_HEIGHT, self.background_turn, angle=180)
                 elif self.map[y][x] == 13:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT- (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                                   CUBE_WIDTH, CUBE_HEIGHT, self.background_turn, angle=270)
-
+        self.roads.draw()
         self.player1.draw()
         self.player2.draw()
         self.lasers.draw()
         self.boost_range_laser.draw()
         self.boost_speed.draw()
+
 
 
     def on_update(self, delta_time):
@@ -581,7 +670,8 @@ class MyGame(arcade.Window):
         self.player1_and_player2_collision_boost()
         self.buildings.update()
 
-        if time.time() - self.time >= 2:
+        # if time.time() - self.time >= 10:
+        if False:
             x_random = random.randint(0,COLUMN-1)
             y_random  = random.randint(0,ROW-1)
             type_random =random.randint(1,2)
