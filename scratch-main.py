@@ -3,6 +3,7 @@ import time
 from fileinput import filename
 
 import arcade
+from arcade import draw_texture_rectangle
 from arcade.sprite_list import sprite_list
 
 SCREEN_TITLE = ""
@@ -27,13 +28,22 @@ class Building(arcade.Sprite):
             self.durability=DURABILITY
 
         else:
-            self.durability=DURABILITY+10
-
+            self.durability=DURABILITY+1000000000000000
+        self.type_building=type_building
         self.center_x=center_x
         self.center_y=center_y
+        self.destroyed=False
     def update(self):
-        if self.durability<0:
-            self.kill()
+        if not self.destroyed:
+            if self.durability<0:
+
+
+                self.texture=arcade.load_texture("Pictures/Destoed building .png")
+                self.destroyed=True
+                self.remove_from_sprite_lists()
+
+
+
     """робота  колизии """
 
 
@@ -41,9 +51,58 @@ class Building(arcade.Sprite):
 
 
 
+class  SecondGozila(arcade.Sprite):
+    def __init__(self, center_x, center_y, speed,texture):
+        super().__init__(texture,scale=0.75)
+        self.center_x = center_x
+        self.center_y = center_y
+
+        self.speed = speed
+
+        self.under_speed_effect = False
+        self.under_len_effect = False
+
+        self.speed_cd = time.time()
+        self.lenght_cd = time.time()
+
+    def update(self):
+        old_x = self.center_x
+        self.center_x += self.change_x
+
+        if arcade.check_for_collision_with_list(self, window.buildings):
+
+            if self.center_x >old_x:
+                self.center_x-=10
+            elif self.center_x <old_x:
+                self.center_x+=10
+        # Движение по Y
+        old_y = self.center_y
+        self.center_y += self.change_y
+
+        if arcade.check_for_collision_with_list(self, window.buildings):
+
+            if self.center_y >old_y:
+                self.center_y-=10
+            elif self.center_y <old_y:
+                self.center_y+=10
 
 
 
+
+
+
+        if self.right > SCREEN_WIDTH:
+            self.right = SCREEN_WIDTH
+        if self.left < 0:
+            self.left = 0
+        if self.top > SCREEN_HEIGHT:
+            self.top = SCREEN_HEIGHT
+        if self.bottom < 0:
+            self.bottom = 0
+
+        if  self.under_speed_effect and time.time() -self.speed_cd >=5:
+            self.under_speed_effect = False
+            self.speed=SPEED_PLAYER_1
 
 
 
@@ -51,8 +110,8 @@ class Building(arcade.Sprite):
 
 
 class FirstGodzilla (arcade.Sprite):
-    def __init__(self, center_x, center_y, speed):
-        super().__init__('Pictures/blue-godzila-pixilart.png', scale=1)
+    def __init__(self, center_x, center_y, speed,texture):
+        super().__init__(texture, scale=0.75)
         self.center_x = center_x
         self.center_y = center_y
 
@@ -65,19 +124,30 @@ class FirstGodzilla (arcade.Sprite):
         self.lenght_cd=time.time()
 
     def update(self):
-        buildig_hit=arcade.check_for_collision_with_list(self, window.buildings)
-        for building in buildig_hit:
-            if self.left <building.right and  self.angle==-90:
-                self.left=building.right
-            if self.right > building.left and self.angle==90:
-                self.right=building.left
-            if self.top> building.bottom and self.angle==0:
-                self.top=building.bottom
-            if self.bottom < building.top and self.angle==180:
-                self.bottom=building.top
-
+        old_x = self.center_x
         self.center_x += self.change_x
+
+        if arcade.check_for_collision_with_list(self, window.buildings):
+
+            if self.center_x >old_x:
+                self.center_x-=10
+            elif self.center_x <old_x:
+                self.center_x+=10
+        # Движение по Y
+        old_y = self.center_y
         self.center_y += self.change_y
+
+        if arcade.check_for_collision_with_list(self, window.buildings):
+
+            if self.center_y >old_y:
+                self.center_y-=10
+            elif self.center_y <old_y:
+                self.center_y+=10
+
+
+
+
+
 
         if self.right > SCREEN_WIDTH:
             self.right = SCREEN_WIDTH
@@ -93,11 +163,14 @@ class FirstGodzilla (arcade.Sprite):
             self.speed=SPEED_PLAYER_1
 
 class Lazer (arcade.Sprite):
-    def __init__(self, center_x, center_y, speed,angle,under_effect):
-        super().__init__('Pictures/pixilart-drawing  lazer(5).pngl', scale=1, )
+    def __init__(self, center_x, center_y, speed,angle,under_effect, lazer_owener):
+        super().__init__('Pictures/lazer.png', scale=1, )
         self.t = time.time()
         self.center_x = center_x
         self.center_y = center_y
+        self.lazer_owener = lazer_owener
+
+
 
         if under_effect:
             self.lazer_lenght=4
@@ -113,6 +186,7 @@ class Lazer (arcade.Sprite):
             self.center_y -= spawn_position
         if angle == 270:
             self.center_x += spawn_position
+
 
         self.width = CUBE_WIDTH*10
         self.height=CUBE_HEIGHT*2
@@ -133,6 +207,26 @@ class Lazer (arcade.Sprite):
     def update(self):
         self.center_x += self.change_x
         self.center_y += self.change_y
+        hit_list= arcade.check_for_collision_with_list(self,window.buildings )
+        if hit_list:
+            for building in hit_list:
+                if building.type_building:
+                    building.durability-=1
+                else:
+                    self.kill()
+
+
+        if self.lazer_owener != window.player1:
+            if arcade.check_for_collision(self, window.player1):
+                print("PLAYER 1 HIT")
+                self.kill()
+
+        if self.lazer_owener != window.player2:
+            if arcade.check_for_collision(self, window.player2):
+                print("PLAYER 2 HIT")
+                self.kill()
+
+
 
         if time.time() - self.t >= self.lazer_lenght:
             self.kill()
@@ -154,6 +248,7 @@ class MyGame(arcade.Window):
 
         print(self.width, self.height)
         """ background """
+        self.destroyed_texture =arcade.load_texture("Pictures/Destoed building .png")
         self.background_picture = arcade.load_texture("Pictures/загрузка (1).jpg")
         self.background_weak_building = arcade.load_texture("Pictures/pixilart-drawing (8).png")
         self.background_strong_building = arcade.load_texture("Pictures/pixilart-drawing (6).png")
@@ -176,6 +271,8 @@ class MyGame(arcade.Window):
         self.hand = None
 
         self.buildings= arcade.SpriteList()
+        self.buildings = arcade.SpriteList()
+        self.destroyed_buildings = arcade.SpriteList()
         self.background_4way = arcade.load_texture("Pictures/pixilart-drawing (11).png")
         """all generations """
 
@@ -205,8 +302,13 @@ class MyGame(arcade.Window):
         self.spawn_4way()
         # self.spawn_road()
         """ players """
-        self.player1 = FirstGodzilla(center_x=CUBE_WIDTH*4, center_y=CUBE_HEIGHT*4, speed=SPEED_PLAYER_1)
-        self.player2 = FirstGodzilla(center_x=CUBE_WIDTH*8, center_y=CUBE_HEIGHT*4, speed=SPEED_PLAYER_2)
+        coord1, coord2 = self.godzilla_spawn()
+        x1,y1 = coord1
+        x2,y2 = coord2
+
+        self.player1 = FirstGodzilla(center_x=self.find_center(CUBE_WIDTH,x1+1), center_y=SCREEN_HEIGHT-self.find_center(CUBE_HEIGHT,y1+1), speed=SPEED_PLAYER_1,texture="Pictures/blue-godzila-pixilart.png")
+        self.player2 = SecondGozila(center_x=self.find_center(CUBE_WIDTH,x2+1), center_y=SCREEN_HEIGHT-self.find_center(CUBE_HEIGHT,y2+1), speed=SPEED_PLAYER_2,texture="Pictures/pixilart-drawing (9).png")
+
 
 
         """ sprite lists """
@@ -215,6 +317,8 @@ class MyGame(arcade.Window):
         self.boost_range_laser = arcade.SpriteList()
 
         self.time=time.time()
+    def find_center(self,side,coord):
+        return (side*coord-side/2)
 
     def player1_and_player2_collision_boost(self):
 
@@ -233,10 +337,15 @@ class MyGame(arcade.Window):
                 boost.kill()
 
             if arcade.check_for_collision(self.player2, boost):
-                if boost.type==1:
-                    self.player2.speed+=2
-                boost.kill()
+                if boost.type == 1:
+                    self.player2.speed += 6
+                    self.player2.under_speed_effect = True
+                    self.player2.speed_cd = time.time()
 
+                if boost.type == 2:
+                    self.player2.under_len_effect = True
+                    self.player2.lenght_cd = time.time()
+                boost.kill()
 
 
 
@@ -406,8 +515,22 @@ class MyGame(arcade.Window):
                 center_y=self.player1.center_y,
                 speed=SPEED_LASER_1,
                 angle=self.player1.angle,
-                under_effect=self.player1.under_len_effect
+                under_effect=self.player1.under_len_effect,
+                lazer_owener=self.player1
             )
+            self.lasers.append(laser)
+
+
+        if button == arcade.MOUSE_BUTTON_RIGHT:
+            laser = Lazer(
+                center_x=self.player2.center_x,
+                center_y=self.player2.center_y,
+                speed=SPEED_LASER_1,
+                angle=self.player2.angle,
+                under_effect=self.player2.under_len_effect,
+                lazer_owener = self.player2
+            )
+
             self.lasers.append(laser)
 
 
@@ -417,6 +540,7 @@ class MyGame(arcade.Window):
 
         if symbol == arcade.key.SPACE:
             self.spawn_4way()
+
 
         if symbol == arcade.key.W:
             self.player1.change_y = self.player1.speed
@@ -433,12 +557,17 @@ class MyGame(arcade.Window):
 
         if symbol == arcade.key.UP:
             self.player2.change_y = self.player2.speed
+            self.player2.angle = 0
         if symbol == arcade.key.LEFT:
             self.player2.change_x = -self.player2.speed
+            self.player2.angle = 90
         if symbol == arcade.key.DOWN:
             self.player2.change_y = -self.player2.speed
+            self.player2.angle = 180
+
         if symbol == arcade.key.RIGHT:
             self.player2.change_x = self.player2.speed
+            self.player2.angle = 270
 
 
     def on_key_release(self, symbol: int, modifiers: int):
@@ -467,17 +596,18 @@ class MyGame(arcade.Window):
                 if self.map[y][x] == 0:
 
                     new_building = Building(center_x=x * CUBE_WIDTH + CUBE_WIDTH / 2,
-                                            center_y=y * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                            center_y=SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                             type_building=random.randint(0, 1))
                     self.buildings.append(new_building)
 
     def on_draw(self):
-        self.clear((255, 255, 255))
+        self.clear((0,0 ,0 ))
+        self.draw_background()
         self.buildings.draw()
         for y in range(ROW):
             for x in range(COLUMN):
                 if self.map[y][x] == 0:
-                  print(0)
+                  pass
 
                 elif self.map[y][x] == 1:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,  SCREEN_HEIGHT-(y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
@@ -516,9 +646,33 @@ class MyGame(arcade.Window):
         self.lasers.draw()
         self.boost_range_laser.draw()
         self.boost_speed.draw()
+        self.buildings.draw()
+
+    def draw_background(self):
+        for x in range(COLUMN):
+            for y in range(ROW):
+                arcade.draw_texture_rectangle(self.find_center(CUBE_WIDTH,x+1),self.find_center(CUBE_HEIGHT,y+1),CUBE_WIDTH,CUBE_HEIGHT
+                                              ,self.destroyed_texture)
 
 
-    def on_update(self, delta_time):
+    def godzilla_spawn(self):
+        coords=[]
+        for x in range(COLUMN):
+            for y in range(ROW):
+                if self.map[y][x]==5:
+                    coords.append((x,y))
+        godzilla_1_spawn =random.choice(coords)
+
+        coords.remove(godzilla_1_spawn)
+        godzilla_2_spawn = random.choice(coords)
+        return godzilla_1_spawn,godzilla_2_spawn
+
+
+
+
+
+
+    def update(self, delta_time):
 
         self.player1.update()
         self.player2.update()
@@ -526,7 +680,10 @@ class MyGame(arcade.Window):
         self.boost_range_laser.update()
         self.boost_speed.update()
         self.player1_and_player2_collision_boost()
+
         self.buildings.update()
+
+
 
         if time.time() - self.time >= 2:
             x_random = random.randint(0,COLUMN-1)
