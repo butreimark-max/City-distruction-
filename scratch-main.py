@@ -108,7 +108,7 @@ class  SecondGozila(arcade.Sprite):
 
 
 
-
+""" класс клон нужны карденаты  текстура  таймер для цвета self.color"""
 class FirstGodzilla (arcade.Sprite):
     def __init__(self, center_x, center_y, speed,texture):
         super().__init__(texture, scale=0.75)
@@ -261,6 +261,8 @@ class MyGame(arcade.Window):
         self.background_t_turn_up = arcade.load_texture("Pictures/new-road-pixilart.png")
         self.background_t_turn_right = arcade.load_texture("Pictures/new-road-pixilart.png")
         self.background_t_turn_down = arcade.load_texture("Pictures/new-road-pixilart.png")
+        self.background_turn = arcade.load_texture("Pictures/turn.png")
+
 
         self.background_road_horizontal = [
             arcade.load_texture("Pictures/pixilart-drawing (10).png"),
@@ -391,7 +393,7 @@ class MyGame(arcade.Window):
 
                     # t нижнюю сторону
                     elif self.map[row - 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
-                        column + 1] == 2  and not  self.map[row+1][column] == 1:
+                        column + 1] == 2  and (not  self.map[row+1][column] == 1 or  row==1):
                         self.map[row][column] = 9
 
                     # t правую сторону
@@ -402,7 +404,7 @@ class MyGame(arcade.Window):
 
                     # t верхнюю сторону
                     elif self.map[row + 1][column] == 1 and self.map[row][column - 1] == 2 and self.map[row][
-                        column + 1] == 2 and not  self.map[row-1][column] == 1:
+                        column + 1] == 2 and not  self.map[row-1][column] ==1:
 
                         self.map[row][column] = 7
 
@@ -410,6 +412,42 @@ class MyGame(arcade.Window):
                     elif self.map[row][column - 1] == 2 and self.map[row - 1][column] == 1 and self.map[row + 1][
                         column] == 1   and not self.map[row][column+1] == 2:
                         self.map[row][column] = 6
+
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row + 1][column] == 1 and
+                            self.map[row][column - 1] == 2 and
+                            self.map[row - 1][column] != 1 and
+                            self.map[row][column + 1] != 2
+                    ):
+                        self.map[row][column] = 10
+
+                    # Поворот вверх + вправо
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row +1][column] == 1 and
+                            self.map[row][column + 1] == 2 and
+                            self.map[row - 1][column] != 1 and
+                            self.map[row][column - 1] != 2
+
+                    ):
+                        self.map[row][column] = 11
+
+                    # Поворот вниз + вправо
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row - 1][column] == 1 and
+                            self.map[row][column + 1] == 2 and
+                            self.map[row +1][column] != 1 and
+                            self.map[row][column - 1] != 2
+                    ):
+                        self.map[row][column] = 12
+
+                    # Поворот вниз + влево
+                    elif (  self.map[row][column] in [1, 2] and
+                            self.map[row - 1][column] == 1 and
+                            self.map[row][column - 1] == 2 and
+                            self.map[row + 1][column] != 1 and
+                            self.map[row][column + 1] != 2
+                    ):
+                        self.map[row][column] = 13
 
 
 
@@ -639,6 +677,31 @@ class MyGame(arcade.Window):
                 elif self.map[y][x] == 9:
                     arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2, SCREEN_HEIGHT- (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),
                                                   CUBE_WIDTH, CUBE_HEIGHT, self.background_t_turn_down, angle=90)
+                elif self.map[y][x] == 10:
+                    arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),width=CUBE_WIDTH,height=CUBE_HEIGHT, angle=0,
+                                    texture=self.background_turn)
+
+
+                elif self.map[y][x] == 11:
+                    arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),width=CUBE_WIDTH,height=CUBE_HEIGHT, angle=270,
+                                    texture=self.background_turn)
+
+
+                elif self.map[y][x] == 12:
+                    arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),width=CUBE_WIDTH,height=CUBE_HEIGHT, angle=180,
+                                    texture=self.background_turn)
+
+                elif self.map[y][x] == 13:
+                    arcade.draw_texture_rectangle(x * CUBE_WIDTH + CUBE_WIDTH / 2,
+                                    SCREEN_HEIGHT - (y * CUBE_HEIGHT + CUBE_HEIGHT / 2),width=CUBE_WIDTH,height=CUBE_HEIGHT, angle=90,
+                                    texture=self.background_turn)
+
+
+
+
 
 
         self.player1.draw()
